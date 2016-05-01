@@ -31,3 +31,18 @@ $ bloom-release -r indigo -t indigo my_secrete_package
 ```
 
 Bloom will find your dependencies now.
+
+## Private distro files
+
+`rosdep-generator` deduces the URL of the `distribution.yaml` file from the
+given `org`, `repo`, and `rosdistro` command line parameters. However, if you
+are working locally, or not hosting your private rosdistro repo on github, you
+may override the full URL to the `distribution.yaml` file with the
+`--distribution-file` parameter. You may also specify a custom output filename
+with the `--output` parameter.
+
+Example:
+
+````
+$ ./rosdep-generator --distro indigo --distribution-file file:///home/user/foo-rosdistro/indigo/distribution.yaml -O ros-rosdistro-indigo-foo.yaml
+````

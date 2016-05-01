@@ -9,9 +9,14 @@ parser = argparse.ArgumentParser(description="Generate rosdep key mapping so tha
 parser.add_argument("--org", default="ros", help="Github org from which to fetch rosdistro.")
 parser.add_argument("--repo", default="rosdistro", help="Github repo from which to fetch rosdistro.")
 parser.add_argument("--distro", default="indigo", help="Distro to generate for.")
+parser.add_argument("--distribution-file", default="", help="Override for the full url to a 'distribution.yaml' file. If not given, the URL is guessed from org, repo and rosdistro.")
+parser.add_argument("--output", "-O", default="", help="Override for the output file name. If not given, it `{org}-{repo}-{distro}.yaml` is used.")
 args = parser.parse_args()
 
-url = "https://github.com/%s/%s/raw/master/%s/distribution.yaml" % \
+if args.distribution_file:
+    url = args.distribution_file
+else:
+    url = "https://github.com/%s/%s/raw/master/%s/distribution.yaml" % \
         (args.org, args.repo, args.distro)
 
 print "Downloading: %s" % url
@@ -37,14 +42,17 @@ for package in packages:
     for platform in platforms:
         output_yaml[package][platform] = "ros-%s-%s" % (args.distro, package.replace("_", "-"))
 
-output_file = "%s-%s-%s.yaml" % (args.org, args.repo, args.distro)
+if args.output:
+    output_file = args.output
+else:
+    output_file = "%s-%s-%s.yaml" % (args.org, args.repo, args.distro)
 print "Outputting: %s" % output_file
 with open(output_file, "w") as f:
     yaml.dump(output_yaml, f)
 
 print "Complete. Suggested next steps:"
 print
-print '  sudo sh -c \'echo "yaml file://%s/%s %s" > /etc/ros/rosdep/sources.list.d/90-%s-%s-%s.list\'' % \
-        (os.getcwd(), output_file, args.distro, args.org, args.repo, args.distro)
+print '  sudo sh -c \'echo "yaml file://%s/%s %s" > /etc/ros/rosdep/sources.list.d/90-%s.list\'' % \
+        (os.getcwd(), output_file, args.distro, output_file.replace('.yaml', ''))
 print '  rosdep update'
 print
